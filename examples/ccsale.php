@@ -9,7 +9,8 @@ $PaymentProcessor = new \markroland\Converge\ConvergeApi(
     'YOUR_CONVERGE_MERCHANTID',
     'YOUR_CONVERGE_USERID',
     'YOUR_CONVERGE_PIN',
-    false
+    $live=false,
+    $test=true
 );
 
 // Submit a purchase

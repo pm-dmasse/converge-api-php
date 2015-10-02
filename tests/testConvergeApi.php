@@ -19,7 +19,8 @@ class convergeApiTest extends PHPUnit_Framework_TestCase
             'YOUR_CONVERGE_MERCHANTID',
             'YOUR_CONVERGE_USERID',
             'YOUR_CONVERGE_PIN',
-            false
+            $live=false,
+            $test=true
         );
 
     }
@@ -57,7 +58,8 @@ class convergeApiTest extends PHPUnit_Framework_TestCase
             'YOUR_CONVERGE_MERCHANTID',
             'YOUR_CONVERGE_USERID',
             'YOUR_CONVERGE_PIN',
-            true
+            $live=true,
+            $test=false
         );
 
         $response = $this->ConvergeApi->ccsale(

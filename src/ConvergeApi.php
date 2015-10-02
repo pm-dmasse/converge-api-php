@@ -40,6 +40,12 @@ class ConvergeApi
     private $live = true;
 
     /**
+     * API Test mode
+     * @var boolean
+     */
+    private $test = false;
+
+    /**
      * A variable to hold debugging information
      * @var array
      */
@@ -54,12 +60,13 @@ class ConvergeApi
      * @param boolean $live True to use the Live server, false to use the Demo server
      * @return null
      **/
-    public function __construct($merchant_id, $user_id, $pin, $live = true)
+    public function __construct($merchant_id, $user_id, $pin, $live = true, $test = false)
     {
         $this->merchant_id = $merchant_id;
         $this->user_id = $user_id;
         $this->pin = $pin;
         $this->live = $live;
+        $this->test = ($test ? 'true' : 'false');
     }
 
     /**
@@ -68,9 +75,10 @@ class ConvergeApi
      * @param string $api_method The API method to be called
      * @param string $http_method The HTTP method to be used (GET, POST, PUT, DELETE, etc.)
      * @param array $data Any data to be sent to the API
+     * @param array $curlopts Any additional cURL options
      * @return string
      **/
-    private function sendRequest($api_method, $http_method = 'GET', $data = null)
+    private function sendRequest($api_method, $http_method = 'GET', $data = null, $curlopts = array())
     {
 
         // Standard data
@@ -79,7 +87,7 @@ class ConvergeApi
         $data['ssl_pin'] = $this->pin;
         $data['ssl_show_form'] = 'false';
         $data['ssl_result_format'] = 'ascii';
-        $data['ssl_test_mode'] = 'false';
+        $data['ssl_test_mode'] = $this->test;
 
         // Set request
         if ($this->live) {
@@ -111,6 +119,10 @@ class ConvergeApi
         // This may be necessary, depending on your server's configuration
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
 
+        if (count($curlopts)) {
+            curl_setopt_array($ch, $curlopts);
+        }
+
         // Send data
         if (!empty($data)) {
 
@@ -128,6 +140,12 @@ class ConvergeApi
         // Save CURL debugging info
         $this->debug['Last Response'] = $curl_response;
         $this->debug['Curl Info'] = curl_getinfo($ch);
+
+        if (strlen(curl_error($ch))) {
+            return array(
+                'curlError' => curl_error($ch),
+            );
+        }
 
         // Close cURL handle
         curl_close($ch);
@@ -162,10 +180,10 @@ class ConvergeApi
      * @param array $parameters Input parameters
      * @return array Response from Converge
      **/
-    public function ccsale(array $parameters = array())
+    public function ccsale(array $parameters = array(), array $curlopts = array())
     {
         $parameters['ssl_transaction_type'] = 'ccsale';
-        return $this->sendRequest('ccsale', 'POST', $parameters);
+        return $this->sendRequest('ccsale', 'POST', $parameters, $curlopts);
     }
 
     /**
@@ -173,9 +191,9 @@ class ConvergeApi
      * @param array $parameters Input parameters
      * @return array Response from Converge
      **/
-    public function ccaddinstall(array $parameters = array())
+    public function ccaddinstall(array $parameters = array(), array $curlopts = array())
     {
         $parameters['ssl_transaction_type'] = 'ccaddinstall';
-        return $this->sendRequest('ccaddinstall', 'POST', $parameters);
+        return $this->sendRequest('ccaddinstall', 'POST', $parameters, $curlopts);
     }
 }
